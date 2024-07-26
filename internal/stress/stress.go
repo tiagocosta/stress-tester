@@ -51,7 +51,11 @@ func (tester *Tester) Stress() {
 }
 
 func worker(jobs <-chan job, out chan<- int, wg *sync.WaitGroup) {
-	client := http.Client{}
+	client := &http.Client{
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
 	for job := range jobs {
 		req, err := http.NewRequest("GET", job.url, nil)
 		if err != nil {
